@@ -103,7 +103,7 @@ export function BuyForm() {
         />
 
         <div className="flex flex-col gap-1">
-          <Label>Amount</Label>
+          <Label>Amount (ETH)</Label>
           <Input
             type="text"
             inputMode="decimal"
