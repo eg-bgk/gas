@@ -3,6 +3,7 @@ import { MiniKit } from "@worldcoin/minikit-js";
 import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 // import ky from "ky";
 import { useEffect, useState } from "react";
+import { parseEther } from "viem";
 import { z } from "zod";
 
 import { env } from "@/env.mjs";
@@ -41,13 +42,16 @@ export function useBuyToken(
         return;
       }
 
+      console.log("tokenAddress", tokenAddress);
+      console.log("amount", parseEther(amount));
+
       const { commandPayload, finalPayload } = await MiniKit.commandsAsync.sendTransaction({
         transaction: [
           {
             address: FUN_FACTORY_ADDRESS,
             abi: funFactoryAbi,
             functionName: "buyTokens",
-            args: [tokenAddress, amount],
+            args: [tokenAddress, Number(parseEther(amount))],
           },
         ],
       });

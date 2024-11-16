@@ -16,7 +16,9 @@ export function useTokenPrice({ tokenAddress }: { tokenAddress: `0x${string}` })
 
       const ethPrice = formatEther(price);
 
-      return Number(ethPrice) * 3000;
+      console.log("price", price);
+
+      return (Number(ethPrice) * 3000).toFixed(4);
     },
   });
 }

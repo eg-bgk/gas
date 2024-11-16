@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ export default function BuyPage() {
     resolver: zodResolver(buyTokenSchema),
     defaultValues: {
       tokenAddress: tokenAddress ?? "",
-      amount: 1,
+      amount: "1",
     },
   });
   const {
@@ -38,8 +38,13 @@ export default function BuyPage() {
     formState: { errors },
   } = form;
 
+  const router = useRouter();
   const { data: tokens } = useTokens();
-  const { mutate: buyToken, isPending } = useBuyToken();
+  const { mutate: buyToken, isPending } = useBuyToken({
+    onSuccess() {
+      router.push("/");
+    },
+  });
 
   const onSubmit = handleSubmit((data) => {
     console.log("data", data);
@@ -85,7 +90,14 @@ export default function BuyPage() {
 
         <div className="flex flex-col gap-1">
           <Label>Amount</Label>
-          <Input type="text" inputMode="numeric" pattern="[0-9]*" {...register("amount")} />
+          <Input
+            type="text"
+            inputMode="decimal"
+            pattern="[0-9]*[.,]?[0-9]*"
+            {...register("amount", {
+              setValueAs: (value) => value.replace(",", "."),
+            })}
+          />
           {errors?.amount && (
             <p className="px-1 text-xs text-destructive">{errors.amount.message}</p>
           )}
