@@ -1,16 +1,18 @@
-'use client';
+"use client";
 
 import {
   SignProtocolClient,
   SpMode,
-  EvmChains,
-  IndexService,
   decodeOnChainData,
-  DataLocationOnChain
+  DataLocationOnChain,
+  OffChainSignType,
 } from "@ethsign/sp-sdk";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useState } from "react";
-import { useAccount, useChainId } from "wagmi";
+import { Hex } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+
+import { env } from "@/env.mjs";
 
 // Separate component for better organization
 function SignActions() {
@@ -19,29 +21,31 @@ function SignActions() {
     schemaId: "",
     attestationId: "",
     attestationData: "",
-    schemaData: ""
+    schemaData: "",
   });
-  
-  const { address } = useAccount();
-  const chainId = useChainId();
+
+  const address = "0xB53a639152c7BACBDC79b1aB263643EB25609E53";
+
+  // const chainId = useChainId();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const createSchema = async () => {
     try {
-      const client = new SignProtocolClient(SpMode.OnChain, {
-        chain: EvmChains.baseSepolia
+      const client = new SignProtocolClient(SpMode.OffChain, {
+        signType: OffChainSignType.EvmEip712,
+        account: privateKeyToAccount(env.NEXT_PUBLIC_SIGNER as Hex),
       });
 
       const res = await client.createSchema({
         name: "SDK Test",
         data: [
           { name: "contractDetails", type: "string" },
-          { name: "signer", type: "address" }
-        ]
+          { name: "signer", type: "address" },
+        ],
       });
 
       setResult(JSON.stringify(res, null, 2));
@@ -52,17 +56,18 @@ function SignActions() {
 
   const createAttestation = async () => {
     try {
-      const client = new SignProtocolClient(SpMode.OnChain, {
-        chain: EvmChains.baseSepolia
+      const client = new SignProtocolClient(SpMode.OffChain, {
+        signType: OffChainSignType.EvmEip712,
+        account: privateKeyToAccount(env.NEXT_PUBLIC_SIGNER as Hex),
       });
 
       const res = await client.createAttestation({
         schemaId: formData.schemaId,
         data: {
           contractDetails: "contract details",
-          signer: address
+          signer: address,
         },
-        indexingValue: address?.toLowerCase() ?? ""
+        indexingValue: address?.toLowerCase() ?? "",
       });
 
       setResult(JSON.stringify(res, null, 2));
@@ -72,46 +77,48 @@ function SignActions() {
   };
 
   return (
-    <div className="flex flex-col gap-8 w-full max-w-md">
+    <div className="flex w-full max-w-md flex-col gap-8">
       <ConnectButton />
-      
+
       <div className="space-y-4">
         <button
-          className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+          className="w-full rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
           onClick={createSchema}
         >
           Create Schema
         </button>
 
         <input
-          className="w-full px-4 py-2 border rounded text-black"
+          className="w-full rounded border bg-background px-4 py-2"
           id="schemaId"
           placeholder="Schema ID"
           value={formData.schemaId}
           onChange={handleInputChange}
         />
-        
+
         <button
-          className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+          className="w-full rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
           onClick={createAttestation}
         >
           Create Attestation
         </button>
 
         <input
-          className="w-full px-4 py-2 border rounded text-black"
+          className="w-full rounded border bg-background px-4 py-2"
           id="attestationId"
           placeholder="Attestation ID"
           value={formData.attestationId}
           onChange={handleInputChange}
         />
         <button
-          className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+          className="w-full rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
           onClick={async () => {
-            const indexService = new IndexService("testnet");
+            const client = new SignProtocolClient(SpMode.OffChain, {
+              signType: OffChainSignType.EvmEip712,
+              account: privateKeyToAccount(env.NEXT_PUBLIC_SIGNER as Hex),
+            });
 
-            const attId = `onchain_evm_${chainId}_${formData.attestationId}`;
-            const res = await indexService.queryAttestationList(attId);
+            const res = await client.getAttestation(formData.attestationId);
 
             setResult(JSON.stringify(res, null, 2));
           }}
@@ -120,33 +127,37 @@ function SignActions() {
         </button>
 
         <input
-          className="w-full px-4 py-2 border rounded text-black"
+          className="w-full rounded border bg-background px-4 py-2"
           id="attestationData"
           placeholder="Attestation Data"
           value={formData.attestationData}
           onChange={handleInputChange}
         />
         <input
-          className="w-full px-4 py-2 border rounded text-black"
+          className="w-full rounded border bg-background px-4 py-2"
           id="schemaData"
           placeholder="Schema Data"
           value={formData.schemaData}
           onChange={handleInputChange}
         />
         <button
-          className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+          className="w-full rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
           onClick={async () => {
             setResult(
-              JSON.stringify(decodeOnChainData(formData.attestationData, DataLocationOnChain.ONCHAIN, JSON.parse(formData.schemaData)))
+              JSON.stringify(
+                decodeOnChainData(
+                  formData.attestationData,
+                  DataLocationOnChain.ONCHAIN,
+                  JSON.parse(formData.schemaData),
+                ),
+              ),
             );
           }}
         >
           Decode Attestation Data
         </button>
 
-        <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-[200px] text-sm">
-          {result}
-        </pre>
+        <pre className="max-h-[200px] overflow-auto rounded bg-muted p-4 text-sm">{result}</pre>
       </div>
     </div>
   );
@@ -155,8 +166,8 @@ function SignActions() {
 export default function SignPage() {
   return (
     <div className="min-h-screen p-8">
-      <main className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-8">Sign Protocol Interface</h1>
+      <main className="mx-auto max-w-4xl">
+        <h1 className="mb-8 text-2xl font-bold">Sign Protocol Interface</h1>
         <SignActions />
       </main>
     </div>
