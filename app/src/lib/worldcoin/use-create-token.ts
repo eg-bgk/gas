@@ -42,7 +42,7 @@ export function useCreateToken(
       const { commandPayload, finalPayload } = await MiniKit.commandsAsync.sendTransaction({
         transaction: [
           {
-            address: "0xce4d639a7B897EFF69a7176b8108b2e4270a902c",
+            address: "0xbaf79b44bb59e5d03c293e386b99347d333733f0",
             abi: funFactoryAbi,
             functionName: "createToken",
             args: [name, ticker, description, "Url"],
