@@ -38,33 +38,12 @@ const config: HardhatUserConfig = {
     localhost: {
       url: "http://localhost:8545",
     },
-    sepolia: {
-      url: process.env.SEPOLIA_RPC_URL || "https://rpc.ankr.com/eth_sepolia",
+    worldchain_sepolia: {
+      url: process.env.WORLDCHAIN_SEPOLIA_RPC_URL || "https://worldchain-sepolia.g.alchemy.com/public",
       accounts,
     },
-    optimism_sepolia: {
-      url:
-        process.env.OPTIMISM_SEPOLIA_RPC_URL ||
-        "https://rpc.ankr.com/optimism_sepolia",
-      accounts,
-    },
-    base_sepolia: {
-      url:
-        process.env.BASE_SEPOLIA_RPC_URL || "https://rpc.ankr.com/base_sepolia",
-      accounts,
-    },
-    arbitrum_sepolia: {
-      url:
-        process.env.ARBITRUM_SEPOLIA_RPC_URL ||
-        "https://rpc.ankr.com/arbitrum_sepolia",
-      accounts,
-    },
-    mumbai: {
-      url: process.env.MUMBAI_RPC_URL || "https://rpc.ankr.com/polygon_mumbai",
-      accounts,
-    },
-    fuji: {
-      url: process.env.FUJI_RPC_URL || "https://rpc.ankr.com/avalanche_fuji",
+    worldchain: {
+      url: process.env.WORLDCHAIN_RPC_URL || "https://worldchain-mainnet.g.alchemy.com/public",
       accounts,
     },
   },
