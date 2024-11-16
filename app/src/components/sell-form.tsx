@@ -83,7 +83,7 @@ export function SellForm() {
         />
 
         <div className="flex flex-col gap-1">
-          <Label>Amount</Label>
+          <Label>Amount ({selectedToken?.symbol})</Label>
           <Input
             type="text"
             inputMode="decimal"

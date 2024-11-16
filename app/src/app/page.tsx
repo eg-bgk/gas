@@ -13,8 +13,6 @@ export default function Home() {
   const topTokenByPrice = tokens?.sort((a, b) => Number(b.price) - Number(a.price))[0];
   const otherTokens = tokens?.slice(1);
 
-  console.log(tokens);
-
   return (
     <div className="flex w-full flex-col">
       <div className="mb-10 flex items-center justify-between">
