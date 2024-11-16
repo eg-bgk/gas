@@ -33,6 +33,8 @@ contract FunFactory {
     string memory desc,
     string memory imgUri
   ) external returns (address) {
+    // require(creatorTokens[msg.sender].length < 1, "Max 1 token per creator");
+    
     // Deploy new token
     WorldFun newToken = new WorldFun(name, symbol);
     address tokenAddress = address(newToken);

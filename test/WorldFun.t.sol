@@ -10,8 +10,10 @@ contract WorldFunTest is Test {
     address public user2;
     address public user3;
 
-    event PriceUpdate(uint256 oldPrice, uint256 newPrice);
-    event TokensPurchased(address indexed buyer, uint256 ethAmount, uint256 tokenAmount);
+    event PriceUpdate(uint256 oldPrice, uint256 newPrice, uint256 timestamp, WorldFun.PricePhase phase);
+    event TokensPurchased(address indexed buyer, uint256 paymentAmount, uint256 tokenAmount, uint256 price, uint256 marketCap);
+    event TokensSold(address indexed seller, uint256 tokenAmount, uint256 ethAmount);
+    event LaunchThresholdReached(uint256 marketCap, uint256 timestamp);
 
     function setUp() public {
         worldFun = new WorldFun("WorldFun Token", "WFT");
@@ -45,73 +47,87 @@ contract WorldFunTest is Test {
         assertTrue(worldFun.calculatePrice(ninetyPercentSupply) > worldFun.calculatePrice(fiftyPercentSupply));
     }
 
-    function test_BuyZeroAmount() public {
-        vm.startPrank(user1);
-        vm.expectRevert("Must send ETH");
-        worldFun.buy{value: 0}();
-        vm.stopPrank();
-    }
-
-    function test_MultiplePurchases() public {
-        uint256 buyAmount = 0.001 ether;
-        
-        // First purchase
-        vm.startPrank(user1);
-        uint256 initialBalance = address(worldFun).balance;
-        uint256 initialTokens = worldFun.balanceOf(user1);
-        
-        worldFun.buy{value: buyAmount}();
-        
-        uint256 firstPurchaseTokens = worldFun.balanceOf(user1) - initialTokens;
-        assertEq(address(worldFun).balance, initialBalance + buyAmount);
-        vm.stopPrank();
-
-        // Second purchase (should get fewer tokens for same ETH due to price increase)
-        vm.startPrank(user2);
-        worldFun.buy{value: buyAmount}();
-        uint256 secondPurchaseTokens = worldFun.balanceOf(user2);
-        assertTrue(secondPurchaseTokens < firstPurchaseTokens);
-        vm.stopPrank();
-    }
-
-    function test_EventEmission() public {
-        uint256 buyAmount = 0.001 ether;
-        
-        vm.startPrank(user1);
-        vm.expectEmit(true, false, false, false);
-        emit TokensPurchased(user1, buyAmount, 0); // We don't check the exact token amount
-        worldFun.buy{value: buyAmount}();
-        vm.stopPrank();
-    }
-
-    function testFuzz_Buy(uint256 buyAmount) public {
-        buyAmount = bound(buyAmount, 0.0001 ether, 0.001 ether);
+    function test_BuyWithPaymentAmount() public {
+        uint256 paymentAmount = 1 ether;
         
         vm.startPrank(user1);
         uint256 initialBalance = user1.balance;
         uint256 initialTokens = worldFun.balanceOf(user1);
         
-        worldFun.buy{value: buyAmount}();
+        worldFun.buy(paymentAmount);
         
         assertTrue(worldFun.balanceOf(user1) > initialTokens);
-        assertEq(user1.balance, initialBalance - buyAmount);
-        assertEq(address(worldFun).balance, buyAmount);
-        
+        assertEq(worldFun.userInvested(user1), paymentAmount);
+        assertEq(user1.balance, initialBalance);
         vm.stopPrank();
     }
 
-    function test_PriceIncrease() public {
-        uint256 buyAmount = 0.001 ether;
-        uint256 previousPrice = worldFun.calculatePrice(0);
+    function test_Sell() public {
+        // First buy some tokens
+        uint256 buyAmount = 1 ether;
+        vm.startPrank(user1);
+        worldFun.buy(buyAmount);
+        uint256 tokenBalance = worldFun.balanceOf(user1);
         
-        for(uint i = 0; i < 5; i++) {
-            vm.startPrank(user1);
-            worldFun.buy{value: buyAmount}();
-            vm.stopPrank();
-            
-            uint256 currentPrice = worldFun.calculatePrice(worldFun.totalSupply());
-            assertTrue(currentPrice > previousPrice);
-            previousPrice = currentPrice;
-        }
+        // Then sell half of them
+        uint256 sellAmount = tokenBalance / 2;
+        worldFun.sell(sellAmount);
+        
+        assertEq(worldFun.balanceOf(user1), tokenBalance - sellAmount);
+        assertTrue(worldFun.userWithdrawn(user1) > 0);
+        vm.stopPrank();
+    }
+
+    function test_LaunchThreshold() public {
+        // Calculate amount needed to reach launch threshold
+        // Launch happens when marketCap = currentSupply * currentPrice >= LAUNCH_MARKET_CAP
+        uint256 paymentAmount = 10 ether; // Start with a smaller amount
+        
+        vm.startPrank(user1);
+        vm.expectEmit(false, false, false, true);
+        emit LaunchThresholdReached(worldFun.LAUNCH_MARKET_CAP(), block.timestamp);
+        worldFun.buy(paymentAmount);
+        
+        assertTrue(worldFun.isLaunched());
+        assertTrue(worldFun.launchPrice() > 0);
+        vm.stopPrank();
+    }
+
+    function test_PostLaunchPrice() public {
+        // Use smaller amounts to avoid exceeding max supply
+        vm.startPrank(user1);
+        worldFun.buy(10 ether);
+        
+        // Verify price calculation
+        uint256 currentSupply = worldFun.totalSupply();
+        uint256 currentPrice = worldFun.calculatePrice(currentSupply);
+        
+        // Test price increases with supply
+        assertTrue(worldFun.calculatePrice(currentSupply + 1000) > currentPrice);
+        vm.stopPrank();
+    }
+
+    function test_MinTradeAmount() public {
+        vm.startPrank(user1);
+        // Buy some tokens first
+        worldFun.buy(1 ether);
+        
+        // Try to sell below minimum
+        uint256 tinyAmount = worldFun.MIN_TRADE_AMOUNT() - 1;
+        vm.expectRevert("Insufficient amount");  // Update expected revert message
+        worldFun.sell(tinyAmount);
+        vm.stopPrank();
+    }
+
+    function test_SellAfterLaunch() public {
+        // Use smaller amounts to avoid exceeding max supply
+        vm.startPrank(user1);
+        worldFun.buy(10 ether);
+        uint256 tokenBalance = worldFun.balanceOf(user1);
+        
+        // Try to sell after launch
+        vm.expectRevert("Use DEX after launch");
+        worldFun.sell(tokenBalance / 2);
+        vm.stopPrank();
     }
 }

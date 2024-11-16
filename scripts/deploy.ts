@@ -24,11 +24,6 @@ task("deploy", "📰 Deploys a contract, saves the artifact and verifies it.")
       console.log(
         `📰 Contract ${args.contract} deployed to ${network.name} at address: ${Contract.target}`
       )
-
-      // const chainId = (await viem.getPublicClient()).chain.id
-
-      // args.save && (await save(chainId, Contract.address, Contract.abi))
-      // args.verify && (await verify(run, Contract.address, []))
     } catch (error) {
       console.error("Deployment failed:", error)
     }
