@@ -1,5 +1,6 @@
 "use client";
 
+import { User } from "lucide-react";
 import Link from "next/link";
 
 import { TokenCard } from "@/components/token-card";
@@ -14,7 +15,15 @@ export default function Home() {
 
   return (
     <div className="flex w-full flex-col">
-      <h1 className="mb-10 font-heading text-3xl font-bold">Tokens</h1>
+      <div className="mb-10 flex items-center justify-between">
+        <h1 className="font-heading text-3xl font-bold">Tokens</h1>
+
+        <Link href="/account">
+          <Button size={"icon"} variant={"secondary"} className="rounded-full">
+            <User />
+          </Button>
+        </Link>
+      </div>
 
       <div className="mb-8 flex flex-1 flex-col gap-4 overflow-auto">
         {!tokens?.length ? (
