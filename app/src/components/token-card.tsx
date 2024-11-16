@@ -22,7 +22,7 @@ export function TokenCard({ token, className, isMostPopular }: TokenCardProps) {
             : undefined,
         }}
         className={cn(
-          "-m-3 rounded-lg border-0 bg-background p-3 text-card-foreground shadow-none hover:bg-secondary",
+          "rounded-lg border-0 bg-background p-3 text-card-foreground shadow-none hover:bg-secondary",
           className,
         )}
       >

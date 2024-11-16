@@ -16,7 +16,7 @@ export default function Home() {
     <div className="flex w-full flex-col">
       <h1 className="mb-10 font-heading text-3xl font-bold">Tokens</h1>
 
-      <div className="flex flex-1 flex-col gap-8">
+      <div className="mb-8 flex flex-1 flex-col gap-4 overflow-auto">
         {!tokens?.length ? (
           <div>No tokens found</div>
         ) : (
@@ -24,7 +24,7 @@ export default function Home() {
             <h3 className="text-lg font-semibold">Most Popular</h3>
             {topTokenByPrice && <TokenCard token={topTokenByPrice} isMostPopular />}
 
-            <h3 className="mt-4 text-lg font-semibold">All Tokens</h3>
+            <h3 className="mt-2 text-lg font-semibold">All Tokens</h3>
             {otherTokens?.map((token) => <TokenCard key={token.tokenAddress} token={token} />)}
           </>
         )}
