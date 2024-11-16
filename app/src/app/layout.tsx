@@ -4,6 +4,7 @@ import { DM_Sans } from "next/font/google";
 
 import Providers from "@/app/providers";
 // import { Header } from "@/components/layout/header";
+import { Toaster } from "@/components/ui/toaster";
 import { getSession } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,7 @@ export default async function RootLayout({
       <body className={cn("font-sans antialiased", fontSans.variable, fontHeading.variable)}>
         <Providers session={session}>
           <main className="container flex h-screen py-10">{children}</main>
+          <Toaster />
         </Providers>
       </body>
     </html>

@@ -46,11 +46,33 @@ export function BuyForm() {
   });
 
   const selectedTokenAddress = watch("tokenAddress");
+
+  console.log("selectedTokenAddress", selectedTokenAddress);
+
   const selectedToken = tokens?.find((t) => t.tokenAddress === selectedTokenAddress);
+
+  console.log("selectedToken", selectedToken);
+  console.log("tokens", tokens);
 
   return (
     <Form {...form}>
       <form onSubmit={onSubmit} className="flex w-full flex-1 flex-col gap-6">
+        {/* <div className="flex flex-col gap-1">
+          <Label>Token</Label>
+          <Button
+            type="button"
+            className="flex h-16 items-center justify-between gap-2 bg-secondary px-6 text-lg font-normal text-secondary-foreground hover:bg-secondary"
+          >
+            {selectedToken && (
+              <div className="flex items-center gap-2">
+                <TokenAvatar token={selectedToken} className="size-6" />
+                {selectedToken?.name} ({selectedToken?.symbol})
+              </div>
+            )}
+            <ChevronDown className="size-5 stroke-[3px] opacity-50" />
+          </Button>
+        </div> */}
+
         <FormField
           control={form.control}
           name="tokenAddress"

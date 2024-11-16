@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 import { parseEther } from "viem";
 import { z } from "zod";
 
-import { FUN_FACTORY_ADDRESS } from "../addresses";
-
+// import { TransactionLinkButton } from "@/components/transaction-link-button";
 import { env } from "@/env.mjs";
 import { funFactoryAbi } from "@/lib/abis/fun-factory";
+// import { toast } from "@/lib/hooks/use-toast";
 import { worldchainClient } from "@/lib/worldcoin/client";
 
+import { FUN_FACTORY_ADDRESS } from "../addresses";
 
 export const buyTokenSchema = z.object({
   tokenAddress: z.string().min(1, "Required"),
@@ -66,6 +67,13 @@ export function useBuyToken(
 
       const transactionId = finalPayload.transaction_id;
       setTransactionId(transactionId);
+
+      // toast({
+      //   title: "Token Purchased",
+      //   description: "Successfully purchased token.",
+      //   action: <TransactionLinkButton txnHash={transactionId as `0x${string}`} />,
+      //   variant: "default",
+      // });
 
       console.log("success");
     },

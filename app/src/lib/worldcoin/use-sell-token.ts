@@ -5,12 +5,11 @@ import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
-import { FUN_FACTORY_ADDRESS } from "../addresses";
-
 import { env } from "@/env.mjs";
 import { funFactoryAbi } from "@/lib/abis/fun-factory";
 import { worldchainClient } from "@/lib/worldcoin/client";
 
+import { FUN_FACTORY_ADDRESS } from "../addresses";
 
 export const sellTokenSchema = z.object({
   tokenAddress: z.string().min(1, "Required"),
