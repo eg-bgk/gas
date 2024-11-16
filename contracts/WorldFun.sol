@@ -11,10 +11,16 @@ contract WorldFun is ERC20 {
     uint256 paymentAmount,
     uint256 tokenAmount
   );
+  event TokensSold(
+    address indexed seller,
+    uint256 tokenAmount,
+    uint256 ethAmount
+  );
 
   uint256 public constant INITIAL_PRICE = 0.000001 ether;
   uint256 public constant MAX_SUPPLY = 1000000 * 10 ** 18; // 1 million tokens
   uint256 public constant MAX_BUY_AMOUNT = MAX_SUPPLY / 100; // 1% of total supply
+  uint256 public constant MIN_TRADE_AMOUNT = 1000; // 0.001 tokens with 18 decimals
 
   uint256 public lastPrice;
 
@@ -30,9 +36,13 @@ contract WorldFun is ERC20 {
   }
 
   function _calculateBasePrice(uint256 supply) internal pure returns (uint256) {
+    // Linear-quadratic bonding curve: P = P0 * (1 + kx + mx²)
+    // where x is the supply ratio (0 to 1)
     uint256 supplyRatio = (supply * 1e18) / MAX_SUPPLY;
-    uint256 priceIncrease = (supplyRatio * supplyRatio) / 1e18;
-    return (INITIAL_PRICE * (1e18 + priceIncrease)) / 1e18;
+    uint256 linearIncrease = supplyRatio;
+    uint256 quadraticIncrease = (supplyRatio * supplyRatio * 2) / 1e18;
+    uint256 totalIncrease = linearIncrease + quadraticIncrease;
+    return (INITIAL_PRICE * (1e18 + totalIncrease)) / 1e18;
   }
 
   function buy() external payable {
@@ -53,4 +63,28 @@ contract WorldFun is ERC20 {
 
     emit TokensPurchased(msg.sender, msg.value, tokenAmount);
   }
+
+  function sell(uint256 tokenAmount) external {
+    require(tokenAmount >= MIN_TRADE_AMOUNT, "Amount too small");
+    require(tokenAmount <= balanceOf(msg.sender), "Insufficient balance");
+    
+    uint256 currentSupply = totalSupply();
+    require(currentSupply > tokenAmount, "Cannot sell all tokens");
+    
+    uint256 price = calculatePrice(currentSupply - tokenAmount);
+    uint256 ethAmount = (tokenAmount * price) / 1e18;
+    
+    uint256 oldPrice = lastPrice;
+    lastPrice = price;
+    emit PriceUpdate(oldPrice, lastPrice);
+
+    _burn(msg.sender, tokenAmount);
+    
+    (bool success, ) = msg.sender.call{value: ethAmount}("");
+    require(success, "ETH transfer failed");
+
+    emit TokensSold(msg.sender, tokenAmount, ethAmount);
+  }
+
+  receive() external payable {}
 }
