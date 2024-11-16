@@ -3,6 +3,7 @@ import { MiniKit } from "@worldcoin/minikit-js";
 import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 // import ky from "ky";
 import { useEffect, useState } from "react";
+import { parseEther } from "viem";
 import { z } from "zod";
 
 import { FUN_FACTORY_ADDRESS } from "../addresses";
@@ -48,7 +49,7 @@ export function useSellToken(
             address: FUN_FACTORY_ADDRESS,
             abi: funFactoryAbi,
             functionName: "sellTokens",
-            args: [tokenAddress, amount],
+            args: [tokenAddress, parseEther(amount).toString()],
           },
         ],
       });

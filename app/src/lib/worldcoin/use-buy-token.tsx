@@ -7,12 +7,12 @@ import { parseEther } from "viem";
 import { z } from "zod";
 
 // import { TransactionLinkButton } from "@/components/transaction-link-button";
+import { FUN_FACTORY_ADDRESS } from "../addresses";
+
 import { env } from "@/env.mjs";
 import { funFactoryAbi } from "@/lib/abis/fun-factory";
 // import { toast } from "@/lib/hooks/use-toast";
 import { worldchainClient } from "@/lib/worldcoin/client";
-
-import { FUN_FACTORY_ADDRESS } from "../addresses";
 
 export const buyTokenSchema = z.object({
   tokenAddress: z.string().min(1, "Required"),
@@ -53,7 +53,7 @@ export function useBuyToken(
             address: FUN_FACTORY_ADDRESS,
             abi: funFactoryAbi,
             functionName: "buyTokens",
-            args: [tokenAddress, Number(parseEther(amount))],
+            args: [tokenAddress, parseEther(amount).toString()],
           },
         ],
       });
