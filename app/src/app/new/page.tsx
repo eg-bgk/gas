@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -33,9 +34,11 @@ export default function NewTokenPage() {
     },
   });
 
+  const router = useRouter();
   const { mutate: createToken, isPending } = useCreateToken({
     onSuccess() {
       console.log("Token created");
+      router.push("/");
     },
   });
 
