@@ -14,19 +14,19 @@ export type Database = {
           group_id: number
           id: number
           joined_at: string
-          user_id: number
+          user_id: string
         }
         Insert: {
           group_id: number
           id?: never
           joined_at?: string
-          user_id: number
+          user_id: string
         }
         Update: {
           group_id?: number
           id?: never
           joined_at?: string
-          user_id?: number
+          user_id?: string
         }
         Relationships: [
           {
@@ -83,22 +83,22 @@ export type Database = {
           id: number
           poll_id: number
           responded_at: string
-          selected_option_id: number
-          user_id: number
+          selected_option_id: string
+          user_id: string
         }
         Insert: {
           id?: never
           poll_id: number
           responded_at?: string
-          selected_option_id: number
-          user_id: number
+          selected_option_id: string
+          user_id: string
         }
         Update: {
           id?: never
           poll_id?: number
           responded_at?: string
-          selected_option_id?: number
-          user_id?: number
+          selected_option_id?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -157,19 +157,19 @@ export type Database = {
         Row: {
           address: string
           created_at: string
-          id: number
+          id: string
           username: string
         }
         Insert: {
           address: string
           created_at?: string
-          id?: never
+          id: string
           username: string
         }
         Update: {
           address?: string
           created_at?: string
-          id?: never
+          id?: string
           username?: string
         }
         Relationships: []

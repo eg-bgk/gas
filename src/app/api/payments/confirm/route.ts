@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   // 1. Check that the transaction we received from the mini app is the same one we sent
   if (payload.reference === reference) {
     const response = await fetch(
-      `https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transaction_id}?app_id=${env.NEXT_PUBLIC_WORLDCOIN_APP_ID}`,
+      `https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transaction_id}?app_id=${env.NEXT_PUBLIC_WORLD_APP_ID}`,
       {
         method: "GET",
         headers: {

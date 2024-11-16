@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
   const verifyRes = (await verifyCloudProof(
     payload,
-    env.NEXT_PUBLIC_WORLDCOIN_APP_ID as `app_${string}`,
+    env.NEXT_PUBLIC_WORLD_APP_ID as `app_${string}`,
     action,
     signal,
   )) as IVerifyResponse; // Wrapper on this
