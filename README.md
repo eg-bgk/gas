@@ -1,6 +1,6 @@
 # 💊 World.fun
 
-A decentralized platform for creating and trading social tokens, built on Worldcoin for sybil-resistance. Inspired by pump.fun but with added human verification.
+World.fun is a sybil-resistant social token platform built on Worldcoin. Create, trade, and discover personal tokens with automated market making - like pump.fun but with human verification to prevent manipulation.
 
 ## How It Works
 
