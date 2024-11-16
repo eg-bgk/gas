@@ -11,15 +11,15 @@ import { env } from "@/env.mjs";
 import { funFactoryAbi } from "@/lib/abis/fun-factory";
 import { worldchainClient } from "@/lib/worldcoin/client";
 
-export const buyTokenSchema = z.object({
+export const sellTokenSchema = z.object({
   tokenAddress: z.string().min(1, "Required"),
   amount: z.string().min(1, "Required"),
 });
 
-export type BuyTokenData = z.infer<typeof buyTokenSchema>;
+export type SellTokenData = z.infer<typeof sellTokenSchema>;
 
-export function useBuyToken(
-  options?: Omit<UseMutationOptions<void, Error, BuyTokenData, unknown>, "mutationFn"> & {
+export function useSellToken(
+  options?: Omit<UseMutationOptions<void, Error, SellTokenData, unknown>, "mutationFn"> & {
     onSuccess(): void;
   },
 ) {
@@ -36,7 +36,7 @@ export function useBuyToken(
   });
 
   const mutation = useMutation({
-    mutationFn: async ({ tokenAddress, amount }: BuyTokenData) => {
+    mutationFn: async ({ tokenAddress, amount }: SellTokenData) => {
       if (!MiniKit.isInstalled()) {
         return;
       }
@@ -46,7 +46,7 @@ export function useBuyToken(
           {
             address: FUN_FACTORY_ADDRESS,
             abi: funFactoryAbi,
-            functionName: "buyTokens",
+            functionName: "sellTokens",
             args: [tokenAddress, amount],
           },
         ],

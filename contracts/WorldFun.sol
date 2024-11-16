@@ -116,12 +116,11 @@ contract WorldFun is ERC20 {
     uint256 currentSupply = totalSupply();
     require(currentSupply > tokenAmount, "Cannot sell all tokens");
     
-    uint256 price = calculatePrice(currentSupply - tokenAmount);
-    uint256 ethAmount = (tokenAmount * price) / 1e18;
+    uint256 currentPrice = calculatePrice(currentSupply);
+    uint256 ethAmount = (tokenAmount * currentPrice) / 1e18;
     
-    uint256 oldPrice = lastPrice;
-    lastPrice = price;
-    emit PriceUpdate(oldPrice, lastPrice, block.timestamp, PricePhase.INITIAL);
+    lastPrice = calculatePrice(currentSupply - tokenAmount);
+    emit PriceUpdate(currentPrice, lastPrice, block.timestamp, PricePhase.INITIAL);
 
     _burn(msg.sender, tokenAmount);
     userWithdrawn[msg.sender] += ethAmount;

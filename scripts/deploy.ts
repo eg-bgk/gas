@@ -22,7 +22,7 @@ task("deploy", "📰 Deploys a contract, saves the artifact and verifies it.")
       const Contract = await ContractFactory.deploy(...constructorArgs)
 
       console.log(
-        `📰 Contract ${args.contract} deployed to ${network.name} at address: ${Contract.address}`
+        `📰 Contract ${args.contract} deployed to ${network.name} at address: ${Contract.target}`
       )
 
       // const chainId = (await viem.getPublicClient()).chain.id

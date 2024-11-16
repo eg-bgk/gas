@@ -160,6 +160,18 @@ export const worldFunAbi = [
         name: "newPrice",
         type: "uint256",
       },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "timestamp",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "enum WorldFun.PricePhase",
+        name: "phase",
+        type: "uint8",
+      },
     ],
     name: "PriceUpdate",
     type: "event",
@@ -183,6 +195,18 @@ export const worldFunAbi = [
         indexed: false,
         internalType: "uint256",
         name: "tokenAmount",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "price",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "marketCap",
         type: "uint256",
       },
     ],
@@ -372,10 +396,16 @@ export const worldFunAbi = [
     type: "function",
   },
   {
-    inputs: [],
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "paymentAmount",
+        type: "uint256",
+      },
+    ],
     name: "buy",
     outputs: [],
-    stateMutability: "payable",
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -394,7 +424,6 @@ export const worldFunAbi = [
         type: "uint256",
       },
     ],
-
     stateMutability: "view",
     type: "function",
   },
@@ -438,6 +467,25 @@ export const worldFunAbi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "lastTradeBlock",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "launchPrice",
     outputs: [
@@ -465,12 +513,59 @@ export const worldFunAbi = [
   },
   {
     inputs: [],
+    name: "metrics",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "lastUpdateBlock",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "totalVolume",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "peakPrice",
+        type: "uint256",
+      },
+      {
+        internalType: "enum WorldFun.PricePhase",
+        name: "currentPhase",
+        type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "name",
     outputs: [
       {
         internalType: "string",
         name: "",
         type: "string",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "enum WorldFun.PricePhase",
+        name: "",
+        type: "uint8",
+      },
+    ],
+    name: "phaseThresholds",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -569,7 +664,41 @@ export const worldFunAbi = [
     type: "function",
   },
   {
-    stateMutability: "payable",
-    type: "receive",
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "userInvested",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "userWithdrawn",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
   },
 ] as const;

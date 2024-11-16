@@ -56,6 +56,16 @@ contract FunFactory {
     return tokenAddress;
   }
 
+  function buyTokens(address tokenAddress, uint256 amount) external {
+    WorldFun token = WorldFun(tokenAddress);
+    token.buy(amount);
+  }
+
+  function sellTokens(address tokenAddress, uint256 amount) external {
+    WorldFun token = WorldFun(tokenAddress);
+    token.sell(amount);
+  }
+
   function getCreatorTokens(
     address creator
   ) external view returns (address[] memory) {

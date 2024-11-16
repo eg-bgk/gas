@@ -1,17 +1,17 @@
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
-import { MiniKit } from "@worldcoin/minikit-js";
-import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
-import { useEffect, useState } from "react";
+import { Address, createWalletClient, defineChain, http, parseAbi } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { z } from "zod";
 
 import { env } from "@/env.mjs";
 import { funFactoryAbi } from "@/lib/abis/fun-factory";
-import { worldchainClient } from "@/lib/worldcoin/client";
+import { FUN_FACTORY_ADDRESS } from "../addresses";
 
 export const createTokenSchema = z.object({
   name: z.string().min(1, "Required"),
   ticker: z.string().min(1, "Required"),
   description: z.string().min(1, "Required"),
+  imageUri: z.string().min(1, "Required"),
 });
 
 export type CreateTokenData = z.infer<typeof createTokenSchema>;
@@ -23,44 +23,43 @@ export function useCreateToken(
 ) {
   const { onSuccess, ...rest } = options || {};
 
-  const [transactionId, setTransactionId] = useState<string>("");
-
-  const { isLoading: isConfirming, isSuccess: isWaitSuccess } = useWaitForTransactionReceipt({
-    client: worldchainClient,
-    appConfig: {
-      app_id: env.NEXT_PUBLIC_WORLD_APP_ID,
+  const worldchain = defineChain({
+    id: 480,
+    name: "Worldchain",
+    nativeCurrency: {
+      name: "Ethereum",
+      decimals: 18,
+      symbol: "ETH",
     },
-    transactionId: transactionId,
+    rpcUrls: {
+      default: {
+        http: ["https://worldchain-mainnet.g.alchemy.com/public"],
+      },
+    },
   });
 
   const mutation = useMutation({
-    mutationFn: async ({ name, ticker, description }: CreateTokenData) => {
-      if (!MiniKit.isInstalled()) {
-        return;
-      }
+    mutationFn: async ({ name, ticker, description, imageUri }: CreateTokenData) => {
+      const account = privateKeyToAccount(env.NEXT_PUBLIC_SIGNER as Address);
 
-      const { commandPayload, finalPayload } = await MiniKit.commandsAsync.sendTransaction({
-        transaction: [
-          {
-            address: "0xbaf79b44bb59e5d03c293e386b99347d333733f0",
-            abi: funFactoryAbi,
-            functionName: "createToken",
-            args: [name, ticker, description, "Url"],
-          },
-        ],
+      const client = createWalletClient({
+        account,
+        chain: worldchain,
+        transport: http(),
       });
 
-      console.log("commandPayload", commandPayload);
+      const hash = await client.writeContract({
+        address: FUN_FACTORY_ADDRESS,
+        abi: funFactoryAbi,
+        functionName: "createToken",
+        args: [name, ticker, description, imageUri],
+      });
 
-      if (finalPayload.status === "error") {
-        console.log("Error ", finalPayload);
-        return;
+      console.log("Transaction Hash: ", hash);
+
+      if (hash) {
+        onSuccess?.();
       }
-
-      const transactionId = finalPayload.transaction_id;
-      setTransactionId(transactionId);
-
-      console.log("success");
     },
     onError(error: Error) {
       console.error("Error: ", error);
@@ -68,14 +67,8 @@ export function useCreateToken(
     ...rest,
   });
 
-  useEffect(() => {
-    if (isWaitSuccess) {
-      onSuccess?.();
-    }
-  }, [isWaitSuccess, onSuccess]);
-
   return {
     ...mutation,
-    isPending: mutation.isPending || isConfirming,
+    isPending: mutation.isPending,
   };
 }
