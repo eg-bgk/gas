@@ -27,9 +27,7 @@ contract WorldFun is ERC20 {
 
   uint256 public constant INITIAL_PRICE = 0.00001 ether;
   uint256 public constant MAX_SUPPLY = 100 * 10 ** 18; // 100k tokens
-  uint256 public constant MAX_BUY_AMOUNT = MAX_SUPPLY / 100; // 1% of total supply
-  uint256 public constant MIN_TRADE_AMOUNT = 1000; // 0.001 tokens with 18 decimals
-  uint256 public constant LAUNCH_MARKET_CAP = 1000000 ether; // 1 million ETH
+  uint256 public constant LAUNCH_MARKET_CAP = 10000000 ether; // 1 million ETH
 
   uint256 public lastPrice;
   bool public launchThresholdReached;
@@ -62,6 +60,7 @@ contract WorldFun is ERC20 {
     string memory symbol
   ) ERC20(name, symbol) {
     lastPrice = INITIAL_PRICE;
+    isLaunched = false;
     phaseThresholds[PricePhase.INITIAL] = PHASE_THRESHOLD_1;
     phaseThresholds[PricePhase.GROWTH] = PHASE_THRESHOLD_2;
   }
@@ -88,8 +87,6 @@ contract WorldFun is ERC20 {
     uint256 price = calculatePrice(currentSupply);
     uint256 tokenAmount = (paymentAmount * 1e18) / price;
 
-    // require(currentSupply + tokenAmount <= MAX_SUPPLY, "Exceeds max supply");
-
     uint256 oldPrice = lastPrice;
     lastPrice = calculatePrice(currentSupply + tokenAmount);
     emit PriceUpdate(oldPrice, lastPrice, block.timestamp, PricePhase.INITIAL);
@@ -109,11 +106,8 @@ contract WorldFun is ERC20 {
 
   function sell(uint256 tokenAmount) external {
     require(!isLaunched, "Use DEX after launch");
-    // require(tokenAmount <= balanceOf(msg.sender), "Insufficient balance");
     
     uint256 currentSupply = totalSupply();
-    // require(currentSupply > tokenAmount, "Cannot sell all tokens");
-    
     uint256 currentPrice = calculatePrice(currentSupply);
     uint256 ethAmount = (tokenAmount * currentPrice) / 1e18;
     
