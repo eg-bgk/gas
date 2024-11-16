@@ -1,6 +1,7 @@
 "use client";
 
 import { ISuccessResult, MiniKit, VerificationLevel } from "@worldcoin/minikit-js";
+import ky from "ky";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -10,15 +11,6 @@ type VerifyCommandInput = {
   signal?: string;
   verification_level?: VerificationLevel; // Default: Orb
 };
-
-// type MiniAppVerifyActionSuccessPayload = {
-//   status: "success";
-//   proof: string;
-//   merkle_root: string;
-//   nullifier_hash: string;
-//   verification_level: VerificationLevel;
-//   version: number;
-// };
 
 const verifyPayload: VerifyCommandInput = {
   action: "verify-human", // This is your action ID from the Developer Portal
@@ -41,26 +33,17 @@ export default function Home() {
       return;
     }
 
-    console.log("Final payload", finalPayload);
+    const res = await ky
+      .post("/api/verify", {
+        json: {
+          payload: finalPayload as ISuccessResult,
+          action: "verify-human",
+          signal: "0x12312",
+        },
+      })
+      .json<{ success: boolean }>();
 
-    // Verify the proof in the backend
-    const verifyResponse = await fetch("/api/verify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        payload: finalPayload as ISuccessResult, // Parses only the fields we need to verify
-        action: "voting-action",
-        signal: "0x12312", // Optional
-      }),
-    });
-
-    // TODO: Handle Success!
-    const verifyResponseJson = await verifyResponse.json();
-
-    if (verifyResponseJson.status === 200) {
-      console.log("Verification success!");
+    if (res.success) {
       setIsVerified(true);
     }
   };
