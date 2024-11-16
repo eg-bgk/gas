@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@uniswap/permit2/contracts/interfaces/IPermit2.sol" as Permit2;
 
 contract WorldFun is ERC20 {
   event PriceUpdate(uint256 oldPrice, uint256 newPrice);
@@ -29,6 +30,9 @@ contract WorldFun is ERC20 {
   bool public isLaunched;
   uint256 public launchPrice;
 
+  IPermit2 public constant PERMIT2 = IPermit2(0x000000000022D473030F116dDEE9F6B43aC78BA3);
+  IERC20 public constant USDC_E = IERC20(0x79A02482A880bCE3F13e09Da970dC34db4CD24d1);
+
   constructor(
     string memory name,
     string memory symbol
@@ -53,13 +57,22 @@ contract WorldFun is ERC20 {
     return (INITIAL_PRICE * (1e18 + totalIncrease)) / 1e18;
   }
 
-  function buy() external payable {
-    require(msg.value > 0, "Must send ETH");
-    require(!isLaunched, "Use DEX after launch");
-
+  function buy(
+    Permit2.PermitTransferFrom calldata permit,
+    Permit2.SignatureTransferDetails calldata transferDetails,
+    bytes calldata signature
+  ) external {
+    // Transfer USDC.E using Permit2
+    PERMIT2.permitTransferFrom(
+      permit,
+      transferDetails,
+      msg.sender,
+      signature
+    );
+    
     uint256 currentSupply = totalSupply();
     uint256 price = calculatePrice(currentSupply);
-    uint256 tokenAmount = (msg.value * 1e18) / price;
+    uint256 tokenAmount = (transferDetails.requestedAmount * 1e18) / price;
 
     require(tokenAmount <= MAX_BUY_AMOUNT, "Exceeds max buy amount");
     require(currentSupply + tokenAmount <= MAX_SUPPLY, "Exceeds max supply");
@@ -77,7 +90,7 @@ contract WorldFun is ERC20 {
         emit LaunchThresholdReached(marketCap, block.timestamp);
     }
 
-    emit TokensPurchased(msg.sender, msg.value, tokenAmount);
+    emit TokensPurchased(msg.sender, transferDetails.requestedAmount, tokenAmount);
   }
 
   function sell(uint256 tokenAmount) external {
