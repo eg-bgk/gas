@@ -14,5 +14,7 @@ export function useTokens() {
         functionName: "getAllTokenMetadata",
       });
     },
+    refetchInterval: 1000,
+    refetchIntervalInBackground: true,
   });
 }

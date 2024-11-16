@@ -20,5 +20,7 @@ export function useTokenPrice({ tokenAddress }: { tokenAddress: `0x${string}` })
 
       return (Number(ethPrice) * 3000).toFixed(4);
     },
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
   });
 }
