@@ -11,7 +11,7 @@ export default function Login() {
   const { data: session } = useSession();
   const user = session?.user;
 
-  console.log("Client session: ", session?.user);
+  // console.log("Client session: ", session?.user);
 
   const [isVerified, setIsVerified] = useState(false);
 
