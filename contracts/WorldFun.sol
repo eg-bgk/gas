@@ -16,13 +16,18 @@ contract WorldFun is ERC20 {
     uint256 tokenAmount,
     uint256 ethAmount
   );
+  event LaunchThresholdReached(uint256 marketCap, uint256 timestamp);
 
   uint256 public constant INITIAL_PRICE = 0.000001 ether;
   uint256 public constant MAX_SUPPLY = 1000000 * 10 ** 18; // 1 million tokens
   uint256 public constant MAX_BUY_AMOUNT = MAX_SUPPLY / 100; // 1% of total supply
   uint256 public constant MIN_TRADE_AMOUNT = 1000; // 0.001 tokens with 18 decimals
+  uint256 public constant LAUNCH_MARKET_CAP = 1000000 ether; // 1 million ETH
 
   uint256 public lastPrice;
+  bool public launchThresholdReached;
+  bool public isLaunched;
+  uint256 public launchPrice;
 
   constructor(
     string memory name,
@@ -31,7 +36,10 @@ contract WorldFun is ERC20 {
     lastPrice = INITIAL_PRICE;
   }
 
-  function calculatePrice(uint256 supply) public pure returns (uint256) {
+  function calculatePrice(uint256 supply) public view returns (uint256) {
+    if (isLaunched) {
+      return launchPrice;
+    }
     return _calculateBasePrice(supply);
   }
 
@@ -47,6 +55,7 @@ contract WorldFun is ERC20 {
 
   function buy() external payable {
     require(msg.value > 0, "Must send ETH");
+    require(!isLaunched, "Use DEX after launch");
 
     uint256 currentSupply = totalSupply();
     uint256 price = calculatePrice(currentSupply);
@@ -61,10 +70,18 @@ contract WorldFun is ERC20 {
 
     _mint(msg.sender, tokenAmount);
 
+    uint256 marketCap = (currentSupply + tokenAmount) * lastPrice / 1e18;
+    if (!isLaunched && marketCap >= LAUNCH_MARKET_CAP) {
+        isLaunched = true;
+        launchPrice = lastPrice;
+        emit LaunchThresholdReached(marketCap, block.timestamp);
+    }
+
     emit TokensPurchased(msg.sender, msg.value, tokenAmount);
   }
 
   function sell(uint256 tokenAmount) external {
+    require(!isLaunched, "Use DEX after launch");
     require(tokenAmount >= MIN_TRADE_AMOUNT, "Amount too small");
     require(tokenAmount <= balanceOf(msg.sender), "Insufficient balance");
     
