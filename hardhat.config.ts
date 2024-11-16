@@ -1,5 +1,5 @@
-import "@nomicfoundation/hardhat-toolbox-viem"
-import "@nomicfoundation/hardhat-viem"
+import "@nomicfoundation/hardhat-toolbox"
+import "@nomicfoundation/hardhat-ethers"
 import "dotenv/config"
 import "hardhat-contract-sizer"
 import "./scripts/generate"
