@@ -6,7 +6,6 @@ import { privateKeyToAccount } from "viem/accounts";
 import { z } from "zod";
 
 // import { TransactionLinkButton } from "@/components/transaction-link-button";
-import { toast } from "../hooks/use-toast";
 
 import { TransactionLinkButton } from "@/components/transaction-link-button";
 import { env } from "@/env.mjs";
@@ -14,6 +13,8 @@ import { funFactoryAbi } from "@/lib/abis/fun-factory";
 import { FUN_FACTORY_ADDRESS } from "@/lib/addresses";
 // import { toast } from "@/lib/hooks/use-toast";
 import { uploadFileToSupabase } from "@/lib/supabase/storage";
+
+import { toast } from "../hooks/use-toast";
 
 const worldchain = defineChain({
   id: 480,
