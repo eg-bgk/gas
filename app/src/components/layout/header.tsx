@@ -22,7 +22,7 @@ export function Header() {
 
       <Link href="/new">New</Link>
 
-      <Link href="/buy">Buy now</Link>
+      <Link href="/token">Buy now</Link>
       {/* {!isReconnecting && !isConnecting && (
         <div className="flex items-center gap-2 duration-100 animate-in fade-in">
           <ThemeToggle />

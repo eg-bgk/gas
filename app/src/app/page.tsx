@@ -19,6 +19,8 @@ export default function Home() {
       <h1 className="mb-10 font-heading text-3xl font-bold">Tokens</h1>
 
       <div className="flex flex-1 flex-col gap-8">
+        {!tokens?.length && <div>No tokens found</div>}
+
         {tokens?.map((token) => <TokenCard key={token.tokenAddress} token={token} />)}
       </div>
 

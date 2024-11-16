@@ -21,7 +21,7 @@ export function TokenCard({ token }: { token: Token }) {
   const hue = hashString(token.name) % 360; // Get a consistent hue between 0-360
 
   return (
-    <Link href={`/buy?token=${token.tokenAddress}`}>
+    <Link href={`/token?token=${token.tokenAddress}`}>
       <Card className="-m-3 rounded-lg border-0 bg-background p-3 text-card-foreground shadow-none hover:bg-secondary">
         <CardContent className="flex justify-between gap-4 p-0">
           <div className="flex items-center gap-4">
