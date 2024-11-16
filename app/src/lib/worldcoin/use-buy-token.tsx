@@ -45,7 +45,7 @@ export function useBuyToken(
       }
 
       console.log("tokenAddress", tokenAddress);
-      console.log("amount", parseEther(amount));
+      console.log("amount", Number(parseEther(amount)));
 
       const { commandPayload, finalPayload } = await MiniKit.commandsAsync.sendTransaction({
         transaction: [

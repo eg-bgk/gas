@@ -41,18 +41,12 @@ export function BuyForm() {
   });
 
   const onSubmit = handleSubmit((data) => {
-    console.log("data", data);
     buyToken(data);
   });
 
   const selectedTokenAddress = watch("tokenAddress");
 
-  console.log("selectedTokenAddress", selectedTokenAddress);
-
   const selectedToken = tokens?.find((t) => t.tokenAddress === selectedTokenAddress);
-
-  console.log("selectedToken", selectedToken);
-  console.log("tokens", tokens);
 
   return (
     <Form {...form}>
