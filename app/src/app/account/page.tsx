@@ -19,7 +19,7 @@ export default function AccountPage() {
       </div>
 
       <div className="mt-auto w-full">
-        <Button className="h-16 w-full gap-5 text-xl tracking-wide" onClick={() => signOut}>
+        <Button className="h-16 w-full gap-5 text-xl tracking-wide" onClick={() => signOut()}>
           Log Out
         </Button>
       </div>
