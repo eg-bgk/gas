@@ -1,10 +1,20 @@
 import { NextResponse } from "next/server";
 
-export async function POST() {
-  // const uuid = crypto.randomUUID().replace(/-/g, "");
-  const uuid = "123";
+import { createClient } from "@/lib/supabase/admin";
 
-  // TODO: Store the ID field in your database so you can verify the payment later
+export async function POST() {
+  const uuid = crypto.randomUUID().replace(/-/g, "");
+  // const uuid = "123";
+
+  const supabase = createClient();
+  const { error } = await supabase.from("payments").insert({
+    id: uuid,
+    created_at: new Date().toISOString(),
+  });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 
   return NextResponse.json({ id: uuid });
 }

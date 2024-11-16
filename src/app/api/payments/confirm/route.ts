@@ -2,6 +2,7 @@ import { MiniAppPaymentSuccessPayload } from "@worldcoin/minikit-js";
 import { NextRequest, NextResponse } from "next/server";
 
 import { env } from "@/env.mjs";
+import { createClient } from "@/lib/supabase/admin";
 
 interface IRequestPayload {
   payload: MiniAppPaymentSuccessPayload;
@@ -10,9 +11,25 @@ interface IRequestPayload {
 export async function POST(req: NextRequest) {
   const { payload } = (await req.json()) as IRequestPayload;
 
-  // IMPORTANT: Here we should fetch the reference you created in /initiate-payment to ensure the transaction we are verifying is the same one we initiated
-  // const reference = getReferenceFromDB();
-  const reference = "123";
+  // Fetch the reference you created in /initiate-payment to ensure the transaction we are verifying is the same one we initiated
+  // const reference = "123";
+
+  const supabase = createClient();
+  const { data: payment, error } = await supabase
+    .from("payments")
+    .select()
+    .eq("id", payload.reference)
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  if (!payment) {
+    return NextResponse.json({ error: "Payment not found" }, { status: 404 });
+  }
+
+  const reference = payment.id;
 
   // 1. Check that the transaction we received from the mini app is the same one we sent
   if (payload.reference === reference) {
