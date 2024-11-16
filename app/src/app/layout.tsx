@@ -1,17 +1,17 @@
 import "./globals.css";
 
-import { Inter } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 
 import Providers from "@/app/providers";
-import { Header } from "@/components/layout/header";
+// import { Header } from "@/components/layout/header";
 import { getSession } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 import type { Metadata } from "next";
 
-const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const fontSans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
-const fontHeading = Inter({
+const fontHeading = DM_Sans({
   subsets: ["latin"],
   variable: "--font-heading",
 });
@@ -30,18 +30,15 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body
-        className={cn(
-          "min-h-screen font-sans antialiased",
-          fontSans.variable,
-          fontHeading.variable,
-        )}
-      >
+      <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+      </head>
+      <body className={cn("font-sans antialiased", fontSans.variable, fontHeading.variable)}>
         <Providers session={session}>
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="container flex-1 pb-20">{children}</main>
-          </div>
+          <main className="container flex h-screen py-10">{children}</main>
         </Providers>
       </body>
     </html>

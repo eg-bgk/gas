@@ -1,17 +1,22 @@
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
-import { Address, createWalletClient, defineChain, http, parseAbi } from "viem";
+import { MiniKit } from "@worldcoin/minikit-js";
+import { Address, createWalletClient, defineChain, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { z } from "zod";
 
 import { env } from "@/env.mjs";
 import { funFactoryAbi } from "@/lib/abis/fun-factory";
-import { FUN_FACTORY_ADDRESS } from "../addresses";
+import { FUN_FACTORY_ADDRESS } from "@/lib/addresses";
+import { uploadFileToSupabase } from "@/lib/supabase/storage";
 
 export const createTokenSchema = z.object({
   name: z.string().min(1, "Required"),
   ticker: z.string().min(1, "Required"),
   description: z.string().min(1, "Required"),
-  imageUri: z.string().min(1, "Required"),
+  image: z
+    .custom<File>()
+    .refine((file) => file instanceof File, "Image is required")
+    .optional(),
 });
 
 export type CreateTokenData = z.infer<typeof createTokenSchema>;
@@ -39,7 +44,11 @@ export function useCreateToken(
   });
 
   const mutation = useMutation({
-    mutationFn: async ({ name, ticker, description, imageUri }: CreateTokenData) => {
+    mutationFn: async ({ name, ticker, description, image }: CreateTokenData) => {
+      if (!MiniKit.isInstalled()) {
+        return;
+      }
+
       const account = privateKeyToAccount(env.NEXT_PUBLIC_SIGNER as Address);
 
       const client = createWalletClient({
@@ -48,11 +57,23 @@ export function useCreateToken(
         transport: http(),
       });
 
+      let imageUrl = "";
+
+      if (image) {
+        const uploadedImage = await uploadFileToSupabase(image);
+        if (uploadedImage) {
+          imageUrl = uploadedImage;
+        }
+      }
+
+      console.log("imageUrl", imageUrl);
+      console.log("address", FUN_FACTORY_ADDRESS);
+
       const hash = await client.writeContract({
         address: FUN_FACTORY_ADDRESS,
         abi: funFactoryAbi,
         functionName: "createToken",
-        args: [name, ticker, description, imageUri],
+        args: [name, ticker, description, imageUrl],
       });
 
       console.log("Transaction Hash: ", hash);

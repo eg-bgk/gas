@@ -9,6 +9,16 @@ const nextConfig = {
 
     return config;
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "pvmrjqrafikkwqcvrosf.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/public/assets/**",
+      },
+    ],
+  },
 };
 
 // export default withBundleAnalyzer(nextConfig);
