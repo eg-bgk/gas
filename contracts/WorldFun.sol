@@ -3,14 +3,20 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@uniswap/permit2/contracts/interfaces/IPermit2.sol" as Permit2;
 
 contract WorldFun is ERC20 {
-  event PriceUpdate(uint256 oldPrice, uint256 newPrice);
+  event PriceUpdate(
+    uint256 oldPrice,
+    uint256 newPrice,
+    uint256 timestamp,
+    PricePhase phase
+  );
   event TokensPurchased(
     address indexed buyer,
     uint256 paymentAmount,
-    uint256 tokenAmount
+    uint256 tokenAmount,
+    uint256 price,
+    uint256 marketCap
   );
   event TokensSold(
     address indexed seller,
@@ -30,14 +36,34 @@ contract WorldFun is ERC20 {
   bool public isLaunched;
   uint256 public launchPrice;
 
-  IPermit2 public constant PERMIT2 = IPermit2(0x000000000022D473030F116dDEE9F6B43aC78BA3);
-  IERC20 public constant USDC_E = IERC20(0x79A02482A880bCE3F13e09Da970dC34db4CD24d1);
+  // Add new mapping to track user balances
+  mapping(address => uint256) public userInvested;
+  mapping(address => uint256) public userWithdrawn;
+
+  enum PricePhase { INITIAL, GROWTH, ACCELERATION, LAUNCHED }
+  
+  struct MarketMetrics {
+    uint256 lastUpdateBlock;
+    uint256 totalVolume;
+    uint256 peakPrice;
+    PricePhase currentPhase;
+  }
+
+  uint256 private constant PHASE_THRESHOLD_1 = MAX_SUPPLY / 4;
+  uint256 private constant PHASE_THRESHOLD_2 = MAX_SUPPLY / 2;
+  uint256 private constant PRICE_DECIMALS = 18;
+  
+  MarketMetrics public metrics;
+  mapping(address => uint256) public lastTradeBlock;
+  mapping(PricePhase => uint256) public phaseThresholds;
 
   constructor(
     string memory name,
     string memory symbol
   ) ERC20(name, symbol) {
     lastPrice = INITIAL_PRICE;
+    phaseThresholds[PricePhase.INITIAL] = PHASE_THRESHOLD_1;
+    phaseThresholds[PricePhase.GROWTH] = PHASE_THRESHOLD_2;
   }
 
   function calculatePrice(uint256 supply) public view returns (uint256) {
@@ -57,31 +83,20 @@ contract WorldFun is ERC20 {
     return (INITIAL_PRICE * (1e18 + totalIncrease)) / 1e18;
   }
 
-  function buy(
-    Permit2.PermitTransferFrom calldata permit,
-    Permit2.SignatureTransferDetails calldata transferDetails,
-    bytes calldata signature
-  ) external {
-    // Transfer USDC.E using Permit2
-    PERMIT2.permitTransferFrom(
-      permit,
-      transferDetails,
-      msg.sender,
-      signature
-    );
-    
+  function buy(uint256 paymentAmount) external {
     uint256 currentSupply = totalSupply();
     uint256 price = calculatePrice(currentSupply);
-    uint256 tokenAmount = (transferDetails.requestedAmount * 1e18) / price;
+    uint256 tokenAmount = (paymentAmount * 1e18) / price;
 
     require(tokenAmount <= MAX_BUY_AMOUNT, "Exceeds max buy amount");
     require(currentSupply + tokenAmount <= MAX_SUPPLY, "Exceeds max supply");
 
     uint256 oldPrice = lastPrice;
     lastPrice = calculatePrice(currentSupply + tokenAmount);
-    emit PriceUpdate(oldPrice, lastPrice);
+    emit PriceUpdate(oldPrice, lastPrice, block.timestamp, PricePhase.INITIAL);
 
     _mint(msg.sender, tokenAmount);
+    userInvested[msg.sender] += paymentAmount;
 
     uint256 marketCap = (currentSupply + tokenAmount) * lastPrice / 1e18;
     if (!isLaunched && marketCap >= LAUNCH_MARKET_CAP) {
@@ -90,7 +105,7 @@ contract WorldFun is ERC20 {
         emit LaunchThresholdReached(marketCap, block.timestamp);
     }
 
-    emit TokensPurchased(msg.sender, transferDetails.requestedAmount, tokenAmount);
+    emit TokensPurchased(msg.sender, paymentAmount, tokenAmount, price, marketCap);
   }
 
   function sell(uint256 tokenAmount) external {
@@ -106,15 +121,11 @@ contract WorldFun is ERC20 {
     
     uint256 oldPrice = lastPrice;
     lastPrice = price;
-    emit PriceUpdate(oldPrice, lastPrice);
+    emit PriceUpdate(oldPrice, lastPrice, block.timestamp, PricePhase.INITIAL);
 
     _burn(msg.sender, tokenAmount);
-    
-    (bool success, ) = msg.sender.call{value: ethAmount}("");
-    require(success, "ETH transfer failed");
+    userWithdrawn[msg.sender] += ethAmount;
 
     emit TokensSold(msg.sender, tokenAmount, ethAmount);
   }
-
-  receive() external payable {}
 }
