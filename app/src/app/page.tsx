@@ -32,7 +32,7 @@ export default function Home() {
           <div>No tokens found</div>
         ) : (
           <>
-            <h3 className="text-lg font-semibold">Most Popular</h3>
+            <h3 className="text-lg font-semibold">King of the Hill</h3>
             {topTokenByPrice && <TokenCard token={topTokenByPrice} isMostPopular />}
 
             <h3 className="mt-2 text-lg font-semibold">All Tokens</h3>
