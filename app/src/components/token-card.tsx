@@ -6,7 +6,7 @@ import { Token } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface TokenCardProps {
-  token: Token & { price: string; totalSupply: string; marketCap: string };
+  token: Token & { price: string; marketCap: string };
   className?: string;
   isMostPopular?: boolean;
 }

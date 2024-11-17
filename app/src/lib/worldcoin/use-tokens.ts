@@ -39,7 +39,7 @@ export function useTokens() {
           const totalSupplyNumber = Number(formatEther(totalSupply));
           const marketCap = (totalSupplyNumber * Number(price)).toFixed(2);
 
-          return { ...token, price, totalSupply, marketCap };
+          return { ...token, price, marketCap: marketCap.toString() };
         }),
       );
 
