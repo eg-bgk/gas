@@ -7,14 +7,14 @@ import { z } from "zod";
 
 // import { TransactionLinkButton } from "@/components/transaction-link-button";
 
-import { TransactionLinkButton } from "@/components/transaction-link-button";
+// import { TransactionLinkButton } from "@/components/transaction-link-button";
 import { env } from "@/env.mjs";
 import { funFactoryAbi } from "@/lib/abis/fun-factory";
 import { FUN_FACTORY_ADDRESS } from "@/lib/addresses";
 // import { toast } from "@/lib/hooks/use-toast";
 import { uploadFileToSupabase } from "@/lib/supabase/storage";
 
-import { toast } from "../hooks/use-toast";
+// import { toast } from "../hooks/use-toast";
 
 const worldchain = defineChain({
   id: 480,
@@ -116,12 +116,12 @@ export function useCreateToken(
         args: [name, ticker, description, imageUrl],
       });
 
-      toast({
-        title: "Token Created",
-        description: "Successfully created token.",
-        action: <TransactionLinkButton txnHash={hash as `0x${string}`} />,
-        variant: "default",
-      });
+      // toast({
+      //   title: "Token Created",
+      //   description: "Successfully created token.",
+      //   action: <TransactionLinkButton txnHash={hash as `0x${string}`} />,
+      //   variant: "default",
+      // });
 
       console.log("Transaction Hash: ", hash);
 
