@@ -16,7 +16,7 @@ export default function Home() {
   return (
     <div className="flex w-full flex-col">
       <div className="mb-10 flex items-center justify-between">
-        <h1 className="font-heading text-3xl font-bold">Tokens</h1>
+        <h1 className="font-heading text-3xl font-bold">World.fun</h1>
 
         <Link href="/account">
           <Button size={"icon"} variant={"secondary"} className="rounded-full">
