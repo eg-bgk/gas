@@ -12,6 +12,15 @@ interface TokenCardProps {
 }
 
 export function TokenCard({ token, className, isMostPopular }: TokenCardProps) {
+  const formattedMarketCap =
+    Number(token.marketCap) > 0
+      ? Number(token.marketCap) >= 1e9
+        ? (Number(token.marketCap) / 1e9).toFixed(2) + "B"
+        : Number(token.marketCap) >= 1e6
+          ? (Number(token.marketCap) / 1e6).toFixed(2) + "M"
+          : Number(token.marketCap).toFixed(2)
+      : "";
+
   return (
     <Link href={`/token?token=${token.tokenAddress}`}>
       <Card
@@ -45,16 +54,11 @@ export function TokenCard({ token, className, isMostPopular }: TokenCardProps) {
                 })}
               </span>
             </div>
-            <div className="text-lg font-semibold leading-none tracking-tight text-muted-foreground">
-              MC $
-              <span>
-                {Number(token.marketCap) >= 1e9
-                  ? (Number(token.marketCap) / 1e9).toFixed(2) + "B"
-                  : Number(token.marketCap) >= 1e6
-                    ? (Number(token.marketCap) / 1e6).toFixed(2) + "M"
-                    : Number(token.marketCap).toFixed(2)}
-              </span>
-            </div>
+            {formattedMarketCap && (
+              <div className="text-lg font-semibold leading-none tracking-tight text-muted-foreground">
+                MC $<span>{formattedMarketCap}</span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
