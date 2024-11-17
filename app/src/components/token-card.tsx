@@ -1,13 +1,12 @@
 import Link from "next/link";
 
 import { TokenAvatar } from "@/components/token-avatar";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Token } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface TokenCardProps {
-  token: Token & { price: string };
+  token: Token & { price: string; marketCap: string };
   className?: string;
   isMostPopular?: boolean;
 }
@@ -26,7 +25,7 @@ export function TokenCard({ token, className, isMostPopular }: TokenCardProps) {
           className,
         )}
       >
-        <CardContent className="flex justify-between gap-4 p-0">
+        <CardContent className="flex items-center justify-between gap-4 p-0">
           <div className="flex items-center gap-4">
             <TokenAvatar token={token} />
             <div className="flex flex-col gap-2">
@@ -36,13 +35,26 @@ export function TokenCard({ token, className, isMostPopular }: TokenCardProps) {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="text-xl font-semibold leading-none tracking-tight">
-              $<span>{Number(token.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <div className="flex flex-col items-end gap-2">
+            <div className="text-lg font-semibold leading-none tracking-tight">
+              $
+              <span>
+                {Number(token.price).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
             </div>
-            <Button size="sm" className="hidden">
-              Buy
-            </Button>
+            <div className="text-lg font-semibold leading-none tracking-tight text-muted-foreground">
+              MC $
+              <span>
+                {Number(token.marketCap) >= 1e9
+                  ? (Number(token.marketCap) / 1e9).toFixed(2) + "B"
+                  : Number(token.marketCap) >= 1e6
+                    ? (Number(token.marketCap) / 1e6).toFixed(2) + "M"
+                    : Number(token.marketCap).toFixed(2)}
+              </span>
+            </div>
           </div>
         </CardContent>
       </Card>

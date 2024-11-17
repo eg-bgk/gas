@@ -10,6 +10,8 @@ export function useTokens() {
   return useQuery({
     queryKey: ["tokens"],
     queryFn: async () => {
+      console.log("fetching tokens");
+
       const tokens = await worldchainClient.readContract({
         address: FUN_FACTORY_ADDRESS,
         abi: funFactoryAbi,
@@ -19,6 +21,12 @@ export function useTokens() {
       // Get price of each token
       const tokensWithPrice = await Promise.all(
         tokens.map(async (token) => {
+          const totalSupply = await worldchainClient.readContract({
+            address: token.tokenAddress,
+            abi: worldFunAbi,
+            functionName: "totalSupply",
+          });
+
           const lastPrice = await worldchainClient.readContract({
             address: token.tokenAddress,
             abi: worldFunAbi,
@@ -28,7 +36,10 @@ export function useTokens() {
           const ethPrice = formatEther(lastPrice);
           const price = (Number(ethPrice) * 3000).toFixed(4);
 
-          return { ...token, price };
+          const totalSupplyNumber = Number(formatEther(totalSupply));
+          const marketCap = (totalSupplyNumber * Number(price)).toFixed(2);
+
+          return { ...token, price, marketCap: marketCap.toString() };
         }),
       );
 
