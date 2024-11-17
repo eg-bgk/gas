@@ -38,13 +38,7 @@ export function TokenCard({ token, className, isMostPopular }: TokenCardProps) {
           </div>
           <div className="flex items-center gap-2">
             <div className="text-xl font-semibold leading-none tracking-tight">
-              $
-              <span>
-                {Number(token.price).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </span>
+              $<span>{Number(token.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
             <Button size="sm" className="hidden">
               Buy
