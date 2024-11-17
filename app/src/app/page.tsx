@@ -1,12 +1,12 @@
 "use client";
 
 import { User } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { TokenCard } from "@/components/token-card";
 import { Button } from "@/components/ui/button";
 import { useTokens } from "@/lib/worldcoin/use-tokens";
-import Image from "next/image";
 
 export default function Home() {
   const { data: tokens } = useTokens();
